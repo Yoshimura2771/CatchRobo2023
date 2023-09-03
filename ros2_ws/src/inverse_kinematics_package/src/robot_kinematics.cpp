@@ -122,4 +122,6 @@ void robot_kinematics::inverse_kinematics(float *f_posrot, float *joint_angle) {
     joint_angle[2] = PI / 2
             + std::asin(link_len[0] / link_len[1] * std::sin( std::acos(std::pow(link_len[0], 2) + std::pow(r, 2) - std::pow(link_len[1], 2)) / (2 * link_len[0] * r) ) )
             - std::atan2(lxy, _z);
+
+    joint_angle[3] = _posrot[PHI] - joint_angle[0];
 }
