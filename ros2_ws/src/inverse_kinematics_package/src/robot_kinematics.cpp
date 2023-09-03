@@ -39,12 +39,14 @@
 
 #include <cmath>
 
-void posrot_sum(float *posrot0, float *posrot1, float *posrot2){
+/*
+ * void posrot_sum(float *posrot0, float *posrot1, float *posrot2){
     for(int i=0; i<6; i++){
         posrot0[i] = posrot1[i] + posrot[i]
     }
 
 }
+ */
 
 
 robot_kinematics::robot_kinematics(){
@@ -55,7 +57,7 @@ robot_kinematics::robot_kinematics(){
     link_len[2] =  43;
     link_len[3] =  20;
 
-
+/*
     joint_angle_now[0] = 0;
     joint_angle_now[1] = PI * 1/4;
     joint_angle_now[2] = PI * 3/4;
@@ -65,6 +67,7 @@ robot_kinematics::robot_kinematics(){
     joint_angle_trg[1] = joint_angle_now[1];
     joint_angle_trg[2] = joint_angle_now[2];
 
+*/
 
     //lower limit                   upper limit
     joint_angle_lim[0][0]=0;    joint_angle_lim[0][1]=2*PI;
@@ -79,6 +82,13 @@ robot_kinematics::robot_kinematics(){
 
 }
 
+
+void robot_kinematics::convert_field2robot(float *f_posrot, float *r_posrot) {
+    for(int i=0; i<6; i++){
+        r_posrot[i] = f_posrot[i] - robot_pos[i];
+    }
+}
+
 void robot_kinematics::forward_kinematics(float *posrot, float *joint_angle) {
     float lxy = link_len[0]*std::sin(joint_angle[1]) + link_len[1]*std::sin(joint_angle[2]) + link_len[2];
 
@@ -91,19 +101,25 @@ void robot_kinematics::forward_kinematics(float *posrot, float *joint_angle) {
 
 }
 
-void robot_kinematics::inverse_kinematics(float *posrot, float *joint_angle) {
+void robot_kinematics::inverse_kinematics(float *f_posrot, float *joint_angle) {
 
-}
+    float _posrot[6];
 
-void robot_kinematics::set_joint_angle_now(float *) {
+    convert_field2robot(f_posrot, _posrot);
 
-}
+    //Recalculate the point where the tip of the l1 is reaching
+    float lxy = std::sqrt(std::pow(_posrot[X],2) + std::pow(_posrot[Y],2)) - link_len[2];
+    float _z  = _posrot[Z] + link_len[3];
+    float r   = std::sqrt(std::pow(lxy,2) + std::pow(_z,2))
 
 
-void robot_kinematics::set_posrot_now(float *) {
 
-}
+    joint_angle[0] = std::atan2(_posrot[X], _porot[Y]);
 
-void robot_kinematics::set_posrot_trg(float *p_trg_posrot) {
+    joint_angle[1] = PI - std::atan2(lxy, _z)
+            - std::acos(std::pow(link_len[0], 2) + std::pow(r, 2) - std::pow(link_len[1], 2) / (2 * link_len[0] * r) );
 
+    joint_angle[2] = PI / 2
+            + std::asin(link_len[0] / link_len[1] * std::sin( std::acos(std::pow(link_len[0], 2) + std::pow(r, 2) - std::pow(link_len[1], 2)) / (2 * link_len[0] * r) ) )
+            - std::atan2(lxy, _z);
 }

@@ -11,6 +11,8 @@
 
 #define PI 3.14159265
 
+const float robot_pos[6] = {675, -130, 228, 0, 0, 0};
+
 
 
 class robot_kinematics {
@@ -48,10 +50,15 @@ class robot_kinematics {
      *
      */
 private:
+
     float link_len[4];//mm
-    float joint_angle_now[4];
-    float joint_angle_trg[4]
+    //float joint_angle_now[4];
+    //float joint_angle_trg[4]
     float joint_angle_lim[4][2];//rad, {inf, sup}
+
+
+    float r_posrot_trg[6];
+    float r_posrot_now[6];
 
 
     float posrot_trg[6];
@@ -59,12 +66,10 @@ private:
     /* posrot_vec posrot_trg;
      * posrot_vec posrot_now;
      */
+    void convert_field2robot(float*, float*);
+
 
 public:
-    void set_posrot_trg(float*);
-    void set_posrot_now(float*);
-    void set_joint_angle_now(float*);
-
     void inverse_kinematics(float*, float*);
     void forward_kinematics(float*, float*);
 
